@@ -1,0 +1,224 @@
+FORMAT: 1A
+HOST: http://127.0.0.1
+
+# APClient_VN
+
+```  
+版本 v1.0.3  
+```
+
+# group 版號
+
+## 20221031 [APClient_VN_v1.0.3]
+調整 查詢SMART資訊-新增 ‘6’: 登入驗證，APP按下確認鍵後，回傳處理完成(BIDV)
+
+##20221020 [APClient_VN_v1.0.2]
+調整 回報Smart訊息-新增 失敗原因
+
+##20220526 [APClient_VN_v1.0.1]
+增加 查詢Smart資訊
+增加 回報Smart訊息
+
+# group API
+
+## CHECKACCOUNT 配對 [/]
+### 我來測試一個GET [GET /{?action,cellphonenumber}]
+Request 主要參數
+|  名稱 |  型別 |   必要參數(R)|  說明 |
+|------:|:-----:|:------------:|:------|
+|  action  | String   |  R |  必填checkaccount |
+|  cellphonenumber  | String   |  R |  電話號碼 |
+Response 主要參數
+|  名稱 |  型別 | 說明 |
+|---:|---|---|
+|  rc |String|回應代碼|
+|token|String|驗證用token。供後續API調用使用。|
++ Parameters
+    + action: 必填checkaccount (String, required) - 必填checkaccount
+    + cellphonenumber: 0911222515 (String, optional) - 電話號碼
+
++ Response 0 (application/json)
+        {
+           "rc":"0"
+           "token":"E8BA934FA4AF7586F39D874BA64AD...(來自一個GET)"
+        }
+        
+## checkaccount 配對  [/]
+### checkaccount 配對  [POST ]
+
+Request 主要參數
+|  名稱 |  型別 |   必要參數(R)|  說明 |
+|---:|:---:|:---:|:---|
+|  action  | String   |  R |  必填checkaccount |
+|  cellphonenumber  | String   |  R |  電話號碼 |
+
+Response 主要參數
+|  名稱 |  型別 | 說明 |
+|---:|---|---|
+|  rc |String|回應代碼|
+|token|String|驗證用token。供後續API調用使用。|
+
++ Request
+        {
+            "action":"checkaccount",
+            "cellphonenumber":"1231234567890"
+        }
+        
++ Response 200 (application/json)
+        
+        {
+           "rc":"0",
+           "token":"E8BA934FA4AF7586F39D874BA64AD...(來自配對)"
+        }
+        
++ Response 400 (application/json)
+        
+        {
+           "rc":"0",
+           "token":"E8BA934FA4AF7586F39D874BA64AD..."
+        }
+        
+
+## query_sms 查詢簡訊驗證碼 [/]   
+
+### query_sms 查詢簡訊驗證碼 [POST]
+
+Request 主要參數
+名稱|型別|必要參數|說明|
+----|----|--------|----|
+action|String|R|必填query_sms
+token|String|R|驗證用token
+accbookid|String|R|帳本代碼 
+type|String | |驗證碼類型(L:登入，P:付款，A:APP相關)  
+tellcode|String |  | 簡訊辨識碼
+
+
+>**type**與**tellcode**需擇一帶入   
+**tellcode**有帶入時優先判讀
+
+
++ Request 帶入type查詢
+        {
+            "action": "query_sms",
+            "token": "E8BA934FA4AF7586F39D874BA64AD...",
+            "accbookid": "t888",
+            "type": "p"
+        }
+        
++ Request 帶入tellcode查詢
+        {
+            "action": "query_sms",
+            "token": "E8BA934FA4AF7586F39D874BA64AD...",
+            "accbookid": "t888",
+            "tellcode": "1111"
+        }
+        
++ Response 200
+        {
+            "rc": "0",
+            "otp": "123456"
+        }
+
+
+##  image_analyze 圖形驗證碼解析 [/]
+
+### image_analyze 圖形驗證碼解析 [POST]
+Request 主要參數
+名稱|型別|必要參數|說明
+----|----|--------|----
+action|String|R|必填query_sms
+token|String|R|驗證用token
+imgdata|String|R|圖檔內容hexstring
+
+Response 主要參數
+名稱|型別|說明
+----|----|----
+rc |String|必填query_sms
+imgid |String|驗證用token
+text |String|圖檔內容hexstring
+
+
++ Request
+        {
+            "action":"image_analyze",
+            "token":"E8BA934FA4AF7586F39D874BA64AD...",
+            "imgdata": "FFD8FFE000.."
+        }
+        
++ Response 200
+        {
+            "rc": "0",
+            "imgid": "318974895020200189",
+            "text": "abcd"
+        }
+
+##  image_analyze_report 圖形驗證碼解析失敗回報 [/]
+
+### image_analyze_report 圖形驗證碼解析失敗回報 [POST]
+
+Request 主要參數
+名稱    |   型別    | 必要參數(R)   | 說明
+------  |-------    |-----------    |----------------
+action  |  String   |           R   | 必填image_analyze_report
+token   |  String   |           R   | 驗證用token   
+imgid   |  String   |           R   | 圖形驗證碼解析(image_analyze)取得之圖檔ID
+
+Response 主要參數
+名稱    |  型別     | 說明
+------  |-------    |-----
+rc      | String    | 回應代碼
+
++ Request
+        {
+            "action":"image_analyze_report",
+            "token":"E8BA934FA4AF7586F39D874BA64AD...",
+            "imgid": "318974895020200189"
+        }
+
+
++ Response 0
+        {
+            "rc": "0"
+        }
+
+##  registersms 回報OTP訊息 [/]
+
+### registersms 回報OTP訊息 [POST]
+Request 主要參數
+名稱    |型別   |必要參數   |說明
+----    |----   |--------   |----
+action  |String |R          |必填registersms
+token   |String |R          |驗證用token
+sms     |String |         R | 簡訊內容
+sendnumber |  String |           R | 發送者號碼
+
+Response 主要參數
+名稱    |  型別     | 說明
+------  |-------    |-----
+rc      | String    | 回應代碼
+
++ Request
+        {
+            "action":"registersms",
+            "token":"E8BA934FA4AF7586F39D874BA64AD...",
+            "sms": "簡訊內容..",
+            "sendnumber": "+86987654.."
+        }
+
++ Response 200
+        {
+        "rc": "0"
+        }
+
+#  group 狀態碼
+## 狀態碼(status)
+狀態碼 | 說明
+-----|---------- 
+1001 | 登入失敗
+1002 | Token驗證失敗
+1003 | 參數找不到
+1004 | 參數格式錯誤
+2001 | UKEY執行失敗
+3001 | 網路連線異常
+3002 | 主機連線失敗
+3003 | 找不到對應帳本
